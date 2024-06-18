@@ -13,9 +13,34 @@ const video = window.video = document.getElementById('webcam_canvas');
 const canvas = window.canvas = document.getElementById('out_canvas');
 
 // set camera info
-var cameraInfoBox = document.getElementById('camera_info');
-const cameraInfoDefaults = window.cameraInfo = JSON.parse(cameraInfoBox.value);
-
+// var cameraInfoBox = document.getElementById('camera_info');
+// const cameraInfoDefaults = window.cameraInfo = JSON.parse(cameraInfoBox.value);
+const camInfoJSON = ```
+{
+    "camera_matrix": [
+        [
+            939.3384407933022,
+            0,
+            640.347854307481
+        ],
+        [
+            0,
+            938.2560270381138,
+            340.7192620859387
+        ],
+        [
+            0,
+            0,
+            1
+        ]
+    ],
+    "img_size": [
+        1280,
+        720
+    ]
+}
+```
+const cameraInfoDefaults = window.cameraInfo = JSON.parse(camInfoJSON);
 canvas.width = 480;
 canvas.height = 360;
 
