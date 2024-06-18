@@ -15,8 +15,7 @@ const canvas = window.canvas = document.getElementById('out_canvas');
 // set camera info
 // var cameraInfoBox = document.getElementById('camera_info');
 // const cameraInfoDefaults = window.cameraInfo = JSON.parse(cameraInfoBox.value);
-const camInfoJSON = ```
-{
+const camInfoJSON = {
     "camera_matrix": [
         [
             939.3384407933022,
@@ -38,9 +37,9 @@ const camInfoJSON = ```
         1280,
         720
     ]
-}
-```;
-const cameraInfoDefaults = window.cameraInfo = JSON.parse(cameraInfoBox.value);
+};
+
+const cameraInfoDefaults = window.cameraInfo = camInfoJSON;
 canvas.width = 480;
 canvas.height = 360;
 
