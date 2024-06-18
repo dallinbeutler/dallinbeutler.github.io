@@ -6,7 +6,7 @@
  *  https://github.com/webrtc/samples/blob/gh-pages/LICENSE.md
  */
 
-'use strict';
+// 'use strict';
 
 // Put variables in global scope to make them available to the browser console.
 const video = window.video = document.getElementById('webcam_canvas');
@@ -39,8 +39,8 @@ const camInfoJSON = ```
         720
     ]
 }
-```
-const cameraInfoDefaults = window.cameraInfo = JSON.parse(camInfoJSON);
+```;
+const cameraInfoDefaults = window.cameraInfo = JSON.parse(cameraInfoBox.value);
 canvas.width = 480;
 canvas.height = 360;
 
