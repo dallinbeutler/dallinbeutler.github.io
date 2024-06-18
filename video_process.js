@@ -81,7 +81,8 @@ async function process_frame() {
   if (imgSaveRequested && detections.length > 0) {
       let savep = Base64.bytesToBase64(ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data);
       var det = JSON.stringify({
-        det_data: detections[0],
+        det_data: detections,
+        // det_data: detections[0],
         img_data: LZString.compressToUTF16(savep),
         img_width:  ctx.canvas.width,
         img_height: ctx.canvas.height
