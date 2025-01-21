@@ -79,9 +79,13 @@ code {
 }
 
 div#container {
-  margin: 0 auto 0 auto;
-  max-width: 60em;
-  padding: 1em 1.5em 1.3em 1.5em;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* Creates 2 equal columns */
+  gap: 20px;  /* Space between grid items */
+  align-items: start;
 }
 
 div#links {
@@ -263,4 +267,66 @@ ul {
   h1 {
     font-size: 20px;
   }
+}
+
+#input_canvas, #output_canvas {
+  max-width: 100%;
+  margin: 10px;
+  border: 1px solid #ccc;
+}
+
+#status {
+  margin: 10px 0;
+  font-family: 'Roboto', sans-serif;
+  color: #666;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-family: 'Roboto', sans-serif;
+  cursor: pointer;
+}
+
+#download_svg {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 10px;
+  background: #4CAF50;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+/* Make certain elements span full width */
+#status, #capture, #download_svg {
+    grid-column: 1 / -1;  /* Spans all columns */
+}
+
+/* Style for all canvases */
+canvas {
+    width: 100%;
+    height: auto;
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    margin: 0;  /* Remove margin since we're using grid gap */
+}
+
+#saved_det_data {
+    grid-column: 1 / -1;  /* Make textarea span full width */
+    width: 100%;
+    height: 100px;
+    margin: 10px 0;
+    font-family: monospace;
+    padding: 10px;
+}
+
+/* Hide video element but keep it in flow */
+#webcam_canvas {
+    display: none;
+}
+
+/* Remove any conflicting margins from earlier CSS */
+#input_canvas, #output_canvas, #saved_det_canvas {
+    margin: 0;
 }
