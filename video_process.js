@@ -214,130 +214,73 @@ async function processImage() {
 
     while (Object.keys(points).length < 4 && attempts < maxAttempts) {
         const detections = await process_frame();
-        console.log(`Attempt ${attempts + 1}: Found ${detections?.length || 0} detections`);
-        
         if (detections && detections.length > 0) {
             detections.forEach(detection => {
-                // const id = detection.id.toString().padStart(2, '0');
-                console.log(`Processing detection with ID: ${detection.id}`);
-                // if (['00', '01', '10', '11'].includes(id)) {
-                    points[detection.id] = detection
-                    // };
-                
+                points[detection.id] = detection;
             });
         }
         
-        console.log('Current points:', points);
         statusDiv.textContent = `Found ${Object.keys(points).length} of 4 AprilTags... (Attempt ${attempts + 1})`;
         attempts++;
-
-        // Increase delay to 500ms to ensure stable detections
         await new Promise(r => setTimeout(r, 500));
     }
 
     if (Object.keys(points).length < 4) {
-        console.log('Final points collection:', points);
         statusDiv.textContent = `Could only detect ${Object.keys(points).length} AprilTags. Please try again.`;
         return;
     }
 
     statusDiv.textContent = "Processing image...";
-    for (const id in points) {
-        console.log(`Point ${id}:`, points[id]);
-    }
-    // Transform image
-    const source = [
-        // Python uses: points['00'] = (qr.rect.left + qr.rect.width, qr.rect.top)
-        [points[2].center.x, points[2].center.y],          // bottom-left (ID 0)
-        // Python uses: points['01'] = (qr.rect.left + qr.rect.width, qr.rect.top + qr.rect.height)
-        [points[0].center.x, points[0].center.y],          // top-left (ID 1)
-        // Python uses: points['11'] = (qr.rect.left, qr.rect.top + qr.rect.height)
-        [points[1].center.x, points[1].center.y],          // top-right (ID 3)
-        // Python uses: points['10'] = (qr.rect.left, qr.rect.top)
-        [points[3].center.x, points[3].center.y]           // bottom-right (ID 2)
-    ];
-    const sourceScaled = source.map(point => [point[0] / inputCanvas.width, point[1] / inputCanvas.height]);
     
-    // Target points in same order as Python:
-    // [(0,1600), (0,0), (2400, 0), (2400,1600)]
-    const target = [
-      [0, inputCanvas.height],                    // bottom-left
-      [0, 0],                                      // top-left
-      [inputCanvas.width, 0],                     // top-right
-      [inputCanvas.width, inputCanvas.height]    // bottom-right
-  ]; 
-     const targetScaled = [
-    [0, 1],                    // bottom-left
-    [0, 0],                                      // top-left
-    [1, 0],                     // top-right
-    [1, 1]    // bottom-right
-];
-
     try {
-        const coeffs = findCoeffs(sourceScaled, targetScaled);
-        // const coeffs = findCoeffs( targetScaled,sourceScaled);
-        // const coeffs = findCoeffs(target,sourceScaled );
-        console.log("Source points:", source);
-        console.log("Target points:", target);
-        console.log("Transform coefficients:", coeffs);
+        // Define source points from AprilTag centers (normalized)
+        const source = [
+            [points[0].center.x / inputCanvas.width, points[0].center.y / inputCanvas.height], // top-left
+            [points[1].center.x / inputCanvas.width, points[1].center.y / inputCanvas.height], // top-right
+            [points[2].center.x / inputCanvas.width, points[2].center.y / inputCanvas.height], // bottom-left
+            [points[3].center.x / inputCanvas.width, points[3].center.y / inputCanvas.height]  // bottom-right
+        ];
+
+        // Define target points (normalized)
+        const target = [
+            [0, 0],     // top-left
+            [1, 0],     // top-right
+            [0, 1],     // bottom-left
+            [1, 1]      // bottom-right
+        ];
+
+        const coeffs = findCoeffs(source, target);
         
-        outputCanvas.width = video.videoWidth;
-        outputCanvas.height = video.videoHeight;
-        // Clear the output canvas
+        // Set output canvas size
+        outputCanvas.width = inputCanvas.width;
+        outputCanvas.height = inputCanvas.height;
+        
+        // Clear and prepare output canvas
         outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
         
-        outputCtx.drawImage(inputCanvas, 0, 0);
-        
-        // Apply perspective transform
+        // Apply transform
         outputCtx.save();
+        //outputCtx.drawImage(inputCanvas, 0, 0);
+        // Scale to full canvas size
+        outputCtx.scale(outputCanvas.width, outputCanvas.height);
         
-
-        // Calculate scale factors
-        const scaleX = outputCanvas.width / inputCanvas.width;        
-        const scaleY = outputCanvas.height / inputCanvas.height;
-
-        
-        // Apply transform with scaling compensation
-        const transformMatrix = [
-            coeffs[0]  , coeffs[3] ,
-            coeffs[1] , coeffs[4] ,
-            coeffs[2], coeffs[5]
+        const matrix = [
+          coeffs[0], coeffs[1], coeffs[2],
+          coeffs[3], coeffs[4], coeffs[5],
+          coeffs[6], coeffs[7], 1
         ];
         
-        // Add translation to move to top left source point
-        outputCtx.translate(source[1][0] , source[1][1] );
-        outputCtx.transform(...transformMatrix);
+        outputCtx.setTransform(
+          matrix[0], matrix[3],
+          matrix[1], matrix[4],
+          matrix[2], matrix[5]
+        );
         
-
-        // Enable better scaling quality
-        outputCtx.imageSmoothingEnabled = true;
-        outputCtx.imageSmoothingQuality = 'high';
-        
-        outputCtx.drawImage(inputCanvas, 0, 0);
-        outputCtx.drawImage(inputCanvas);
+        // Draw the transformed image
+        outputCtx.drawImage(inputCanvas,0,0,outputCanvas.width, outputCanvas.height);
         outputCtx.restore();
-
-        // // Threshold the image
-        // const imageData = outputCtx.getImageData(0, 0, outputCanvas.width, outputCanvas.height);
-        // for (let i = 0; i < imageData.data.length; i += 4) {
-        //     const brightness = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
-        //     const threshold = brightness > 120 ? 255 : 0;
-        //     imageData.data[i] = threshold;
-        //     imageData.data[i + 1] = threshold;
-        //     imageData.data[i + 2] = threshold;
-        //     imageData.data[i + 3] = 255; // Alpha channel
-        // }
-        // outputCtx.putImageData(imageData, 0, 0);
-
-        // // Convert to SVG using Potrace
-        // const svg = Potrace.fromCanvas(outputCanvas).toSVG();
         
-        // // Enable download
-        // downloadLink.href = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-        // downloadLink.download = 'traced_drawing.svg';
-        // downloadLink.style.display = 'block';
-        
-        statusDiv.textContent = "Processing complete! Click the link to download your SVG.";
+        statusDiv.textContent = "Processing complete!";
     } catch (err) {
         console.error("Error processing image:", err);
         statusDiv.textContent = "Error processing image. Please try again.";
