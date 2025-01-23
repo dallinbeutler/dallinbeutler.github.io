@@ -1,0 +1,18 @@
+{
+  "skipTerminateQuickPick": true,
+  "skipSwitchToOutput": false,
+  "skipErrorMessage": true,
+  "commands": [
+      {
+        "text": "run projector-mapper",
+        "tooltip": "run projector-mapper",
+        "color": "yellow",
+        "commandType": "exec",
+        "command": "cd projector-mapper && bun run dev --open",
+        "alignment": "left",
+        "skipTerminateQuickPick": false,
+        "priority": 1
+    }
+
+  ]
+}

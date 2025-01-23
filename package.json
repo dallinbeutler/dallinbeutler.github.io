@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@threlte/core": "^8.0.0",
+    "@threlte/extras": "^9.0.0",
+    "@types/three": "^0.172.0",
+    "comlink": "^4.4.2",
+    "lz-string": "^1.5.0",
+    "mathjs": "^14.0.1",
+    "three": "^0.172.0"
+  }
+}
